@@ -1,0 +1,42 @@
+//created on: 2015-8-17
+package com.wj.purchase
+
+//list any import classes here.
+// 引入规则中所要用到的包
+import com.wj.purchase.PaymentMethod
+import com.wj.purchase.Purchase
+//declare any global variables here
+
+rule "cash purcharses have no discount"
+
+    when
+    	//传入规则引擎的对象必须是Purchase 对象，而且 购买方法必须为现金
+        p:Purchase(paymentMethod == PaymentMethod.CASH)
+    then
+    	//规则成立，设定折扣为 0
+        p.setDiscount(0);
+        System.out.println("\t==> Executing RULE 'Cash purchases have no discount' for Object: " + p +" ok");
+
+end
+
+rule "debit Card purchases have 5% of discount"
+    //include attributes such as "salience" here...
+    when
+    	//传入规则引擎的对象必须是Purchase 对象，而且 购买方法必须为储蓄卡
+        p:Purchase(paymentMethod == PaymentMethod.DEBIT)
+    then
+    	//规则成立，设定折扣为 5%
+        p.setDiscount(0.05);
+  		System.out.println("\t==> Executing RULE 'Debit Card purchases have 5% of discount' for Object: "  + p);
+
+end
+
+rule "Credit Card purchases have 10% of discount"
+	when
+		//传入规则引擎的对象必须是Purchase 对象，而且 购买方法必须为信用卡
+	  p:Purchase(paymentMethod == PaymentMethod.CREDIT)
+	then
+		//规则成立，设定折扣为 10%
+	  p.setDiscount(0.1);
+	  System.out.println("\t==> Executing RULE ‘Credit Card purchases have 10% of discount' for Object: " + p);
+end

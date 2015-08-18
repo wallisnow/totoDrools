@@ -1,0 +1,44 @@
+//created on: 2015-8-17
+package com.wj.purchase
+
+//list any import classes here.
+import com.wj.service.EmailService;
+
+//declare any global variables here
+
+//规则名
+rule "Identify potential customers"
+	salience 3 //规则优先级，数字越大越先执行
+    when
+    	//传入规则引擎的对象必须是Purchase 对象，而且 购买方法必须为现金 且大于 300
+        p:Purchase(paymentMethod == PaymentMethod.CASH, subtotal > 300)
+    then
+     	System.out.println("\t==> Potential Customer found! " + p);
+        //构造一个潜在对象客户对象，并给予80%的信用额度
+	    PotentialCustomer pc = new PotentialCustomer(p.getCustomerName(), p.getSubtotal()*0.80);
+	    //插入此用户到workmemory
+	    insert(pc);
+end
+
+rule "Send an email offer to Potential Customers with credit limit lower or equal than $500"
+	salience 2
+    when
+    	//传入规则引擎的对象必须是Purchase 对象，且信用额度小于500
+        pc:PotentialCustomer(creditLimit<=500)
+    then
+	    System.out.println("\t==> Sending email to Potential Customer: " + pc);
+
+	   // 邮件通知
+	   EmailService.getInstance().sendCreditCardOffer(pc);
+end
+
+rule "Call Potential Customers with credit limit over $500"
+	salience 1
+    when
+    	//传入规则引擎的对象必须是Purchase 对象，而且 信用额度 且大于500
+        pc:PotentialCustomer(creditLimit>500)
+    then
+    	//打电话给客户
+	    System.out.println("\t==> Calling Potential Customer: " + pc);
+
+end
